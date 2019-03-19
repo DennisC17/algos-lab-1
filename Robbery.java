@@ -6,13 +6,47 @@
 
 public class Robbery {
 
+	public int[][] tableForDP;
+
+	public void initializeTable(int size, int weight){
+		tableForDP = new int[size][weight];
+
+		if(size==weight){
+			for(int i=0; i<size; i++){
+				tableForDP[i][0] = 0;
+				tableForDP[0][i] = 0;
+			}
+		}
+		else if(size<weight){
+			for(int i=0; i<size; i++){
+				tableForDP[i][0] = 0;
+				tableForDP[0][i] = 0;
+			}
+			for(int i = size; i<weight; i++){
+				tableForDP[0][i] = 0;
+			}
+		}
+		else{
+			for(int i=0; i<weight; i++){
+				tableForDP[i][0] = 0;
+				tableForDP[0][i] = 0;
+			}
+			for(int i = weight; i<size; i++){
+				tableForDP[i][0] = 0;
+			}
+		}
+
+
+	}
+
 	// Using DP: Get the maximum value with capacity C and n items
 	public int maximizeRobWorthRecur(
 		int capacity,
 		int[] sizes,
-		int[] worths
-	) {
+		int[] worths) {
+
 		// fill in here, change the return
+
 			return 0;
 	}
 
@@ -40,6 +74,10 @@ public class Robbery {
 		int bagCapacity = 40;
 		int[] itemSizes = {2, 25, 6, 13, 1, 15, 8, 5, 17, 4};
 		int[] itemWorths = {35, 120, 900, 344, 29, 64, 67, 95, 33, 10};
+
+		r.initializeTable(itemSizes.length+1, bagCapacity+1);
+
+//		System.out.println();
 
 		int maxWorthRecur = r.maximizeRobWorthRecur(bagCapacity, itemSizes, itemWorths);
 		System.out.println("Max worth of the bag: " + maxWorthRecur);
