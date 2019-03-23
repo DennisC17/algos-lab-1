@@ -3,13 +3,18 @@
 // get with the items.
 
 // You are encouraged to make helper functions!
+import java.util.Arrays;
 
 public class Robbery {
 
 	public int[][] tableForDP;
+	public int xDP;
+	public int yDP;
 
 	public void initializeTable(int size, int weight){
 		tableForDP = new int[size][weight];
+		xDP = size-1;
+		yDP = weight-1;
 
 		if(size==weight){
 			for(int i=0; i<size; i++){
@@ -35,19 +40,42 @@ public class Robbery {
 				tableForDP[i][0] = 0;
 			}
 		}
-
-
 	}
 
 	// Using DP: Get the maximum value with capacity C and n items
 	public int maximizeRobWorthRecur(
 		int capacity,
 		int[] sizes,
-		int[] worths) {
-
+		int[] worths
+	) {
 		// fill in here, change the return
+		int returningValue = 0;
+		int arrayLength = sizes.length;
+		int[] sizesRed, worthsRed;
 
-			return 0;
+		// creating reduced arrays without the last element
+		if(arrayLength>0){
+			sizesRed = Arrays.copyOfRange(sizes, 0, arrayLength-1);
+			worthsRed = Arrays.copyOfRange(worths, 0, arrayLength-1);
+
+			// if there is no more items OR space, we cannot add the item
+			if(arrayLength == 0 || capacity == 0){
+				returningValue = 0;
+			}
+			// if the weight of the next item exceeds capacity, we cannot add the item
+			else if(sizes[arrayLength-1] > capacity){
+				returningValue = maximizeRobWorthRecur(capacity, sizesRed, worthsRed);
+			}
+			else{
+				// do not take an item
+				int leaveItem = maximizeRobWorthRecur(capacity, sizesRed, worthsRed);
+				// take an item, reduce capacity
+				int takeItem = worths[arrayLength-1] + maximizeRobWorthRecur(capacity - sizes[arrayLength-1], sizesRed, worthsRed);
+				returningValue = Math.max(leaveItem, takeItem);
+			}
+		}
+
+		return returningValue;
 	}
 
 	public int maximizeRobWorthBottomUp(
@@ -55,8 +83,21 @@ public class Robbery {
 		int[] sizes,
 		int[] worths
 	) {
+
+
 		// fill in here, change the return
-		return 0;
+		for(int i = 0; i < sizes.length; i++){
+			for(int j = 1; j<= capacity; j++){
+				if(sizes[i] > j){
+					tableForDP[i+1][j] = tableForDP[i][j];
+				}
+				else{
+					tableForDP[i+1][j] = Math.max( tableForDP[i][j] , tableForDP[i][j-sizes[i]] + worths[i]);
+				}
+			}
+		}
+
+		return tableForDP[sizes.length][capacity];
 	}
 
 /**
@@ -64,9 +105,31 @@ public class Robbery {
 * Takes in a DP DPTable
 * Returns an int array of the individual worths of the items you took
 */
-	public int[] takeRobInventory(int[][] DPTable) {
+	public int[] takeRobInventory() {
 		// fill in here, change the return
-		return new int[DPTable.length];
+		int i = xDP;
+		int j = yDP;
+		int[] itemValues = new int[i];
+		int numberOfItems = 0;
+
+		while(tableForDP[i][j]>0){
+
+			if(tableForDP[i][j] == tableForDP[i-1][j]){
+				i--;
+			}
+			else if(tableForDP[i][j] == tableForDP[i][j-1]){
+				j--;
+			}
+			else{
+				itemValues[numberOfItems] = tableForDP[i][j] - tableForDP[i-1][j];
+				i--;
+				numberOfItems++;
+			}
+		}
+
+		itemValues = Arrays.copyOfRange(itemValues, 0, numberOfItems);
+
+		return itemValues;
 	}
 
 	public static void main(String[] args) {
@@ -88,9 +151,14 @@ public class Robbery {
 		//figure out which items go into the bag that make it max worth. Feel free
 		//to change up the parameters and returned types + values of the helper
 		// methods above.
-		// int[] itemsPicked = r.takeRobInventory();
-		// System.out.println("The items we take are worth:")
-		// for (int i = 0; i < results.length; i++) {
-		// 	System.out.print(results[i] + " ");
+
+
+		 int[] itemsPicked = r.takeRobInventory();
+		 System.out.println("The items we take are worth:");
+		 for (int i = 0; i < itemsPicked.length; i++) {
+			 System.out.print(itemsPicked[i] + " ");
+		 }
+
+
 	}
 }
